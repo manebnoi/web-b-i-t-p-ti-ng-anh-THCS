@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Bài Tập Tiếng Anh THCS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Ôn Luyện Tiếng Anh THCS</h1>
+        <p>Học tập miễn phí - Không cần đăng nhập - Biết điểm ngay</p>
+    </header>
+
+    <nav>
+        <button onclick="loadQuestions(6)">Lớp 6</button>
+        <button onclick="loadQuestions(7)">Lớp 7</button>
+        <button onclick="loadQuestions(8)">Lớp 8</button>
+        <button onclick="loadQuestions(9)">Lớp 9</button>
+    </nav>
+
+    <main>
+        <div id="quiz-container">
+            <p>Vui lòng chọn khối lớp để bắt đầu làm bài!</p>
+        </div>
+        <div id="result-area" class="hidden">
+            <h3>Kết quả của bạn: <span id="score">0</span></h3>
+            <button onclick="resetQuiz()">Làm lại</button>
+        </div>
+    </main>
+
+    <footer>
+        <p>Dự án Khoa học Kỹ thuật 2025-2026</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
