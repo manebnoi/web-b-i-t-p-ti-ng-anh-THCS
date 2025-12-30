@@ -1,39 +1,254 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" class="notranslate" translate="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Bài Tập Tiếng Anh THCS</title>
-    <link rel="stylesheet" href="style.css">
+    <title>English Master - AI Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f0c29; --primary: #00d2ff; --secondary: #928dab;
+            --accent: #3a7bd5; --neon-purple: #bc13fe; --glass: rgba(255, 255, 255, 0.05);
+        }
+        * { box-sizing: border-box; user-select: none; }
+        body {
+            margin: 0; font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white; height: 100vh; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .container {
+            width: 90%; max-width: 900px; background: var(--glass);
+            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px; padding: 30px; box-shadow: 0 0 20px rgba(188, 19, 254, 0.3);
+            position: relative; text-align: center; z-index: 5;
+        }
+        .screen { display: none; animation: fadeIn 0.5s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px var(--primary); }
+        .btn {
+            background: linear-gradient(90deg, var(--accent), var(--neon-purple));
+            border: none; padding: 12px 30px; color: white; font-family: 'Orbitron';
+            cursor: pointer; border-radius: 50px; transition: 0.3s; margin: 10px;
+        }
+        .btn:hover { transform: scale(1.05); box-shadow: 0 0 20px var(--neon-purple); }
+        input { background: rgba(0,0,0,0.5); border: 1px solid var(--primary); color: white; padding: 12px; border-radius: 10px; width: 80%; margin: 10px 0; outline: none; }
+        
+        /* AI Bot Styles */
+        #ai-bot {
+            position: fixed; bottom: 20px; right: 20px; width: 300px;
+            background: rgba(15, 12, 41, 0.95); border: 2px solid var(--primary);
+            border-radius: 15px; padding: 15px; z-index: 1000; box-shadow: 0 0 20px var(--primary);
+            display: none; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .bot-header { font-family: 'Orbitron'; font-size: 0.8rem; color: var(--primary); border-bottom: 1px solid #333; margin-bottom: 10px; display: flex; justify-content: space-between; }
+        #ai-content { font-size: 0.95rem; line-height: 1.4; color: #fff; text-shadow: 0 0 5px rgba(0,210,255,0.5); }
+        
+        /* HUD & Game */
+        .hud { display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; margin-bottom: 20px; font-family: 'Orbitron'; border-bottom: 2px solid var(--primary); }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .option-card { background: rgba(255,255,255,0.05); border: 1px solid var(--secondary); padding: 15px; border-radius: 10px; cursor: pointer; transition: 0.2s; }
+        .option-card:hover { background: rgba(0, 210, 255, 0.2); border-color: var(--primary); }
+        .monitor-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 10px; }
+        .monitor-table th, td { padding: 8px; border: 1px solid rgba(255,255,255,0.1); }
+    </style>
 </head>
 <body>
 
-    <header>
-        <h1>Ôn Luyện Tiếng Anh THCS</h1>
-        <p>Học tập miễn phí - Không cần đăng nhập - Biết điểm ngay</p>
-    </header>
+    <div id="ai-bot">
+        <div class="bot-header"><span>🤖 CYBER-AI ASSISTANT</span><span id="bot-status">● Online</span></div>
+        <div id="ai-content">Đang khởi động hệ thống nhận diện...</div>
+    </div>
 
-    <nav>
-        <button onclick="loadQuestions(6)">Lớp 6</button>
-        <button onclick="loadQuestions(7)">Lớp 7</button>
-        <button onclick="loadQuestions(8)">Lớp 8</button>
-        <button onclick="loadQuestions(9)">Lớp 9</button>
-    </nav>
-
-    <main>
-        <div id="quiz-container">
-            <p>Vui lòng chọn khối lớp để bắt đầu làm bài!</p>
+    <div class="container">
+        <div id="login-screen" class="screen active">
+            <h1>English Master</h1>
+            <p>AI-Powered English Learning Mission</p>
+            <input type="text" id="username" placeholder="Nhập Họ và Tên">
+            <input type="text" id="userclass" placeholder="Nhập Lớp">
+            <br>
+            <button class="btn" onclick="checkLogin()">BẮT ĐẦU NHIỆM VỤ</button>
+            <button class="btn" style="background: #444" onclick="switchScreen('admin-login-screen')">ADMIN</button>
         </div>
-        <div id="result-area" class="hidden">
-            <h3>Kết quả của bạn: <span id="score">0</span></h3>
-            <button onclick="resetQuiz()">Làm lại</button>
+
+        <div id="game-screen" class="screen">
+            <div class="hud">
+                <div style="color:#ff4757">⏰ <span id="time-display">25:00</span></div>
+                <div id="score-display">⭐ 0</div>
+                <div style="color:#ffa502">💎 <span id="gem-display">0</span></div>
+            </div>
+            <h3 id="question-type" style="color:var(--secondary); font-size: 0.8rem;">TYPE</h3>
+            <div id="question-text" style="background:rgba(0,0,0,0.4); padding:20px; border-radius:15px; margin-bottom:20px; font-size:1.2rem;">...</div>
+            <div id="interaction-area"></div>
+            <div id="feedback-msg" style="margin-top:15px; font-weight:bold; height:20px;"></div>
         </div>
-    </main>
 
-    <footer>
-        <p>Dự án Khoa học Kỹ thuật 2025-2026</p>
-    </footer>
+        <div id="admin-login-screen" class="screen">
+            <h2>Xác thực Quản trị</h2>
+            <input type="password" id="admin-pass" placeholder="Mật khẩu Admin">
+            <button class="btn" onclick="validateAdmin()">TRUY CẬP</button>
+            <button class="btn" onclick="switchScreen('login-screen')">HỦY</button>
+        </div>
 
-    <script src="script.js"></script>
+        <div id="admin-panel" class="screen">
+            <h2>Giám sát Hệ thống</h2>
+            <div style="max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.3); border-radius: 10px;">
+                <table class="monitor-table" id="monitor-table">
+                    <thead><tr><th>User</th><th>Class</th><th>Action</th><th>Time</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <button class="btn" onclick="clearLogs()">XÓA NHẬT KÝ</button>
+            <button class="btn" onclick="switchScreen('login-screen')">THOÁT</button>
+        </div>
+
+        <div id="result-screen" class="screen">
+            <h2>Nhiệm vụ Hoàn tất!</h2>
+            <p>Tổng điểm: <span id="final-score">0</span></p>
+            <button class="btn" onclick="location.reload()">LÀM LẠI</button>
+        </div>
+    </div>
+
+    <script>
+        // 1. NGÂN HÀNG CÂU HỎI (250 câu) - Rút gọn ví dụ, bạn copy paste thêm từ danh sách cũ của bạn
+        const questionBank = [
+            { type: 'mcq', q: "She _______ her homework at the moment.", options: ["is doing", "does", "did", "has done"], a: "is doing" },
+            { type: 'mcq', q: "We _______ this film three times already.", options: ["saw", "see", "have seen", "are seeing"], a: "have seen" },
+            // ... THÊM ĐỦ 250 CÂU CỦA BẠN VÀO ĐÂY ...
+        ];
+
+        // 2. BIẾN TOÀN CỤC
+        let currentUser = { name: "", class: "" };
+        let score = 0; let gems = 0;
+        let currentQuestions = []; let qIndex = 0;
+        let timer; let timeLeft = 1500;
+        let userLogs = JSON.parse(localStorage.getItem('cyberLogs')) || [];
+
+        // 3. AI LOGIC (Tương tác mạnh hơn)
+        function aiSpeak(type, customText = "") {
+            const bot = document.getElementById('ai-bot');
+            const content = document.getElementById('ai-content');
+            bot.style.display = 'block';
+            
+            let message = "";
+            const name = currentUser.name;
+
+            switch(type) {
+                case 'welcome': message = `Chào ${name}! Tôi đã nạp dữ liệu bài tập cho lớp ${currentUser.class}. Sẵn sàng chưa?`; break;
+                case 'correct': 
+                    const praise = ["Tuyệt đỉnh!", "Quá chuẩn!", "Đúng rồi đó!"];
+                    message = `${praise[Math.floor(Math.random()*praise.length)]} Bạn đã đạt ${score} điểm.`;
+                    break;
+                case 'wrong': message = `Tiếc quá ${name} ơi. Hãy xem lại cấu trúc này nhé. Đừng bỏ cuộc!`; break;
+                case 'streak': message = `WOW! ${name} đang có chuỗi trả lời đúng rất ấn tượng!`; break;
+                case 'hint': message = customText; break;
+                case 'finish': message = `Chúc mừng ${name}! Bạn đã hoàn thành xuất sắc nhiệm vụ hôm nay.`; break;
+            }
+            content.innerText = message;
+            
+            // Hiệu ứng nháy đèn AI
+            document.getElementById('bot-status').style.color = '#2ed573';
+            setTimeout(() => { document.getElementById('bot-status').style.color = '#00d2ff'; }, 1000);
+        }
+
+        // 4. HỆ THỐNG QUẢN TRỊ & THEO DÕI
+        function logAction(act) {
+            userLogs.push({ user: currentUser.name, class: currentUser.class, action: act, time: new Date().toLocaleTimeString() });
+            localStorage.setItem('cyberLogs', JSON.stringify(userLogs));
+        }
+
+        function validateAdmin() {
+            if (document.getElementById('admin-pass').value === "123456") {
+                switchScreen('admin-panel');
+                const tbody = document.querySelector('#monitor-table tbody');
+                tbody.innerHTML = userLogs.map(l => `<tr><td>${l.user}</td><td>${l.class}</td><td>${l.action}</td><td>${l.time}</td></tr>`).reverse().join('');
+            } else { alert("Sai mật khẩu!"); }
+        }
+
+        // 5. GAME LOGIC
+        function switchScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function checkLogin() {
+            const n = document.getElementById('username').value;
+            const c = document.getElementById('userclass').value;
+            if (n && c) {
+                currentUser = { name: n, class: c };
+                logAction("Đăng nhập");
+                aiSpeak('welcome');
+                setTimeout(startGame, 1500);
+            } else { alert("Nhập tên và lớp!"); }
+        }
+
+        function startGame() {
+            switchScreen('game-screen');
+            currentQuestions = questionBank.sort(() => 0.5 - Math.random()).slice(0, 20);
+            loadQuestion();
+            startTimer();
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                timeLeft--;
+                let m = Math.floor(timeLeft/60); let s = timeLeft%60;
+                document.getElementById('time-display').innerText = `${m}:${s<10?'0'+s:s}`;
+                if(timeLeft <= 0) endGame();
+            }, 1000);
+        }
+
+        function loadQuestion() {
+            const q = currentQuestions[qIndex];
+            document.getElementById('question-type').innerText = `CÂU ${qIndex+1}/20 - ${q.type.toUpperCase()}`;
+            document.getElementById('question-text').innerText = q.q;
+            const area = document.getElementById('interaction-area');
+            area.innerHTML = "";
+            
+            if(q.type === 'mcq') {
+                const grid = document.createElement('div');
+                grid.className = 'options-grid';
+                q.options.forEach(opt => {
+                    const btn = document.createElement('div');
+                    btn.className = 'option-card';
+                    btn.innerText = opt;
+                    btn.onclick = () => checkAnswer(opt, q.a);
+                    grid.appendChild(btn);
+                });
+                area.appendChild(grid);
+            }
+        }
+
+        function checkAnswer(user, correct) {
+            const feedback = document.getElementById('feedback-msg');
+            if (user === correct) {
+                score += 10; feedback.innerText = "CHÍNH XÁC!"; feedback.style.color = "#2ed573";
+                aiSpeak('correct');
+                logAction(`Đúng câu ${qIndex+1}`);
+            } else {
+                feedback.innerText = "SAI RỒI!"; feedback.style.color = "#ff4757";
+                aiSpeak('wrong');
+                logAction(`Sai câu ${qIndex+1}`);
+            }
+            
+            setTimeout(() => {
+                qIndex++;
+                if(qIndex < currentQuestions.length) loadQuestion();
+                else endGame();
+            }, 1500);
+        }
+
+        function endGame() {
+            clearInterval(timer);
+            switchScreen('result-screen');
+            document.getElementById('final-score').innerText = score;
+            aiSpeak('finish');
+            logAction(`Hoàn thành với ${score} điểm`);
+        }
+
+        function clearLogs() { localStorage.removeItem('cyberLogs'); location.reload(); }
+    </script>
 </body>
 </html>
